@@ -1,0 +1,45 @@
+const http = require('https')
+const stream = require('stream')
+require('dotenv').config()
+
+const TWT_API_HOST = "api.twitter.com"
+const TWT_API_PATH = "/2/tweets/sample/stream"
+
+const options = {
+    hostname: TWT_API_HOST,
+    path: TWT_API_PATH,
+    method: 'GET',
+    headers: {
+        Authorization: `Bearer ${process.env.TWITTER_BEARER_TOKEN}`
+    }
+}
+
+const tweetStream = new stream.Readable({
+    read () {}
+})
+
+const req = http.request(options, res => {
+    res.on('data', chunk => {
+        tweetStream.push(chunk.toString())
+    })
+})
+
+const jsonParser = new stream.Transform({
+    writableObjectMode: true,
+    transform(chunk, encoding, callback) {
+        this.push(JSON.stringify(chunk) + '\n')
+        callback()
+    }
+})
+
+const logger = new stream.Writable({
+    objectMode: true,
+    write(chunk, encoding, callback) {
+        console.log(chunk)
+        callback()
+    }
+})
+
+req.on('error', console.log)
+
+req.end()
