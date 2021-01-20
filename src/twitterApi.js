@@ -67,8 +67,9 @@ const twitterApi = {
         })
         if (result.body.data) {
             this.rules = this.rules.concat(result.body.data)
+            return result.body.data
         }
-        return result
+        return []
     },
 
     async deleteAllRules () {

@@ -10,6 +10,7 @@ const jsonParser = new Transform({
         } catch (error) {
 
         }
+        console.warn(chunk.toString())
         this.push(data)
         callback()
     }

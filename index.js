@@ -6,35 +6,45 @@ const WebSocket = require('ws')
 const server = require('./src/server')
 const stream = require('stream')
 const twitterApi = require('./src/twitterApi')
-const logger = require('./src/streams/logger');
-const jsonParser = require('./src/streams/jsonParser');
-const TweetStats = require('./src/TweetStats');
-const jsonStringify = require('./src/streams/jsonStringify')
+const jsonParser = require('./src/streams/jsonParser')
+const logger = require('./src/streams/logger')
+const tweetsCounter = require('./src/streams/tweetsCounter')
+const clientsRules = require('./src/clientsRules')
+const clientFilter = require('./src/streams/clientFilter')
+const wsStream = require('./src/streams/wsStream')
+const { v4: uuidv4 } = require('uuid')
 
 
 const wsServer = new WebSocket.Server({ server })
 
 wsServer.on("connection", (client) => {
-    const clientTweetStats = new TweetStats()
-
-    client.on("message", (subject) => {
+    const clientId = uuidv4()
+    client.send(clientId)
+    client.on("message", async (subject) => {
         console.log("message from client: ", subject)
-        clientTweetStats.setSubjects([ subject ])
-        twitterApi.addRules(clientTweetStats.subjects)
+        // clientTweetStats.setSubjects([ subject ])
+        await clientsRules.addRules([ subject ], clientId)
+        console.log('rule added')
     })
-
-    const socketStream = WebSocket.createWebSocketStream(client);
     client.on('close', () => {
         socketStream.end()
     })
 
+    // const clientFilter = new stream.Transform({
+    //     objectMode: true,
+    //     transform(chunk, encoding, callback) {
+    //         client.send(JSON.stringify(chunk))
+    //         callback()
+    //     }
+    // })
+    const clientFilterStream = clientFilter(clientId)
+    const socketStream = wsStream(client)
     // envoyer des données au client via websocket
-
     stream.pipeline(
         twitterApi.tweetStream,
         jsonParser,
-        clientTweetStats.stream,
-        jsonStringify,
+        tweetsCounter,
+        clientFilterStream,
         socketStream,
         console.error
     )
