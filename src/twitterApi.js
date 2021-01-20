@@ -9,9 +9,7 @@ const twitterApi = {
     req: null,
     rules: [],
     query: {
-        'tweet.fields': 'geo,text,author_id',
-        'place.fields' : 'id,geo,name,country',
-        'expansions': 'geo.place_id'
+        'tweet.fields': 'author_id'
     },
     get queryString () {
         return querystring.encode(this.query)
@@ -34,11 +32,12 @@ const twitterApi = {
             }
         }
 
-        this.req = http.request(options, res => {
+        const req = http.request(options, res => {
             res.on('data', chunk => {
                 this.tweetStream.push(chunk.toString())
             })
         })
+        req.end()
     },
 
     async fetchRules () {
@@ -86,13 +85,10 @@ const twitterApi = {
                     "content-type": "application/json",
                     "authorization": `Bearer ${this.BEARER}`
                 }})
+            this.rules = []
             return response.body
         }
         return null
-    },
-
-    closeConnection () {
-        this.req?.end()
     },
     get ids () {
         return this.rules.map(rule => rule.id)
