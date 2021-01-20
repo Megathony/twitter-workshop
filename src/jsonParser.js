@@ -1,6 +1,6 @@
-const stream = require('stream')
+const {Transform} = require('stream')
 
-const jsonParser = new stream.Transform({
+const jsonParser = new Transform({
     readableObjectMode: true,
 
     transform(chunk, _, callback) {

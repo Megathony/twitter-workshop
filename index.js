@@ -8,17 +8,20 @@ const stream = require('stream')
 const twitterApi = require('./src/twitterApi')
 const logger = require('./src/logger');
 const jsonParser = require('./src/jsonParser');
-const filter = require('./src/filter');
-// connexion api twitter
-// traitements
-// twitterApi.setRules()
+const tweetStats = require('./src/tweetStats');
+const subjects = require('./src/subjects');
 
 
 (async () => {
     await twitterApi.init()
-    await twitterApi.deleteAllRules()
-    //
-    await twitterApi.addRules({value: '#trump has:geo'})
+    // await twitterApi.deleteAllRules()
+    // //
+    // await twitterApi.addRules([
+    //     { value: 'parcoursup', tag: 'criteria1' },
+    //     { value: 'trump', tag: 'criteria2' }
+    // ])
+
+    subjects.setSubjects(twitterApi.rules)
     twitterApi.startTweetStream()
 
     server.listen(3000, () => {
@@ -27,7 +30,7 @@ const filter = require('./src/filter');
     stream.pipeline(
         twitterApi.tweetStream,
         jsonParser,
-        filter,
+        tweetStats,
         logger,
         console.error
     )
