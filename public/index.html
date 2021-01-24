@@ -6,14 +6,34 @@
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Subject battle</title>
+    <style>
+        #spinner {
+            visibility: hidden;
+        }
+        #chart {
+            width: 400px;
+            height: 400px;
+        }
+    </style>
 </head>
 <body>
 <form>
     <input type="text" id="subject1">
     <input type="text" id="subject2">
     <button type="submit">Compare !</button>
+    <span id="spinner">Waiting for tweets to arrive...</span>
 </form>
+<section>
+    <span id="subject1-title"></span> : <span id="subject1-data"></span>
+</section>
+<section>
+    <span id="subject2-title"></span> : <span id="subject2-data"></span>
+</section>
+<section style="width: 500px; max-width: 100%">
+    <canvas id="chart" width="400" height="400"></canvas>
+</section>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js" integrity="sha512-d9xgZrVZpmmQlfonhQUvTR7lMPtO7NkZMkA0ABN3PHCbKA5nqylQ/yWlFAyY6hYgdF1Qh6nYiuADWwKB4C2WSw==" crossorigin="anonymous"></script>
     <script src="app.js"></script>
 </body>
 </html>

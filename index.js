@@ -20,30 +20,18 @@ const wsServer = new WebSocket.Server({ server })
 wsServer.on("connection", (client) => {
     const clientId = uuidv4()
     client.on("message", async (message) => {
-        // clientTweetStats.setSubjects([ subject ])
         const subjects = JSON.parse(message)
+
         await clientsRules.removeUserRules(clientId)
         await clientsRules.addRules(subjects , clientId)
-        try{
-        } catch (e) {
-
-        }
-        // await clientsRules.addRules([ subject ], clientId)
     })
     client.on('close', async () => {
         socketStream.end()
         await clientsRules.removeUserRules(clientId)
     })
-
-    // const clientFilter = new stream.Transform({
-    //     objectMode: true,
-    //     transform(chunk, encoding, callback) {
-    //         client.send(JSON.stringify(chunk))
-    //         callback()
-    //     }
-    // })
     const clientFilterStream = clientFilter(clientId)
     const socketStream = wsStream(client)
+
     // envoyer des données au client via websocket
     stream.pipeline(
         twitterApi.tweetStream,
@@ -54,15 +42,16 @@ wsServer.on("connection", (client) => {
         console.error
     )
 });
-server.listen(3000, () => {
-    console.log("Server running on port 3000")
-});
+
 
 
 ;(async () => {
     await twitterApi.init()
     await twitterApi.deleteAllRules()
-    // twitterApi.startTweetStream()
+    twitterApi.startTweetStream()
+    server.listen(3000, () => {
+        console.log("API ready and server running on port 3000")
+    });
 })()
 // ;(async () => {
 //     await twitterApi.init()
