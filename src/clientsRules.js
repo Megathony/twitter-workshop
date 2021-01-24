@@ -50,6 +50,53 @@ const clientsRules = {
     },
     getRuleByValue (value) {
         return this.rules.find(rule => rule.value === value.toLowerCase())
+    },
+    /**
+     * Remove user from clients list of a rule. If the rule is not affected to a client anymore, remove the rule
+     * @param userId
+     */
+    async removeUserRules (userId) {
+        const rulesIndexes = this.getUsersRulesIndexes(userId)
+        if (rulesIndexes.length) {
+            const rulesToRemove = []
+            rulesIndexes.forEach(i => {
+                const clientIndex = this.rules[i].clients.indexOf(userId)
+                if (clientIndex > -1) {
+                    this.rules[i].clients.splice(clientIndex, 1)
+                }
+                if (this.rules[i].clients.length === 0) {
+                    rulesToRemove.push(this.rules[i])
+                }
+            })
+            if (rulesToRemove.length) {
+                return await this.removeRules(rulesToRemove)
+            }
+            // await twitterApi.deleteRules({
+            //     tags: rules.map(rule => rule.tag)
+            // })
+        }
+    },
+
+    async removeRules (rules) {
+        const tags = rules.map(rule => rule.tag)
+        this.rules = this.rules.filter((rule) => {
+            return !tags.includes(rule.tag)
+        })
+        return await twitterApi.deleteRules({ tags })
+    },
+
+    /**
+     * Get rules for matching user id
+     * @param userId
+     */
+    getUsersRulesIndexes (userId) {
+        const indexes = []
+        this.rules.forEach((rule, index) => {
+            if (rule.clients.includes(userId)) {
+                indexes.push(index)
+            }
+        })
+        return indexes
     }
 }
 

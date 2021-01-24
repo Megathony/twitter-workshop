@@ -72,22 +72,41 @@ const twitterApi = {
         return []
     },
 
+    async deleteRules (rules) {
+        if (rules.tags) {
+            rules.ids = this.tagsToIds(rules.tags)
+        }
+        const data = {
+            "delete": rules
+        }
+
+        const rulesURL = 'https://' + this.TWT_API_HOST + '/2/tweets/search/stream/rules'
+
+        const response = await needle('post', rulesURL, data, {headers: {
+                "content-type": "application/json",
+                "authorization": `Bearer ${this.BEARER}`
+            }})
+        await this.fetchRules()
+        return response.body
+    },
+
+    tagsToIds (tags) {
+        const result = []
+        tags.forEach(tag => {
+            const rule = this.rules.find(rule => rule.tag === tag)
+            if (rule) {
+                result.push(rule.id)
+            }
+        })
+        return result
+    },
+
     async deleteAllRules () {
         if (this.ids.length) {
-            const data = {
-                "delete": {
-                    "ids": this.ids
-                }
+            const rules = {
+                "ids": this.ids
             }
-
-            const rulesURL = 'https://' + this.TWT_API_HOST + '/2/tweets/search/stream/rules'
-
-            const response = await needle('post', rulesURL, data, {headers: {
-                    "content-type": "application/json",
-                    "authorization": `Bearer ${this.BEARER}`
-                }})
-            this.rules = []
-            return response.body
+            return this.deleteRules(rules)
         }
         return null
     },

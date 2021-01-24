@@ -16,7 +16,9 @@ socket.addEventListener('open', function (event) {
 });
 
 const input1 = document.querySelector('#subject1')
+const input2 = document.querySelector('#subject2')
 document.querySelector('form').addEventListener('submit', e => {
     e.preventDefault()
-    socket.send(input1.value)
+    const data = JSON.stringify([ input1.value, input2.value ])
+    socket.send(data)
 })

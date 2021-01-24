@@ -19,15 +19,20 @@ const wsServer = new WebSocket.Server({ server })
 
 wsServer.on("connection", (client) => {
     const clientId = uuidv4()
-    client.send(clientId)
-    client.on("message", async (subject) => {
-        console.log("message from client: ", subject)
+    client.on("message", async (message) => {
         // clientTweetStats.setSubjects([ subject ])
-        await clientsRules.addRules([ subject ], clientId)
-        console.log('rule added')
+        const subjects = JSON.parse(message)
+        await clientsRules.removeUserRules(clientId)
+        await clientsRules.addRules(subjects , clientId)
+        try{
+        } catch (e) {
+
+        }
+        // await clientsRules.addRules([ subject ], clientId)
     })
-    client.on('close', () => {
+    client.on('close', async () => {
         socketStream.end()
+        await clientsRules.removeUserRules(clientId)
     })
 
     // const clientFilter = new stream.Transform({
@@ -57,7 +62,7 @@ server.listen(3000, () => {
 ;(async () => {
     await twitterApi.init()
     await twitterApi.deleteAllRules()
-    twitterApi.startTweetStream()
+    // twitterApi.startTweetStream()
 })()
 // ;(async () => {
 //     await twitterApi.init()
