@@ -1,5 +1,9 @@
 const {Transform} = require('stream')
 
+/**
+ * Transform stream to parse Json
+ * @type {module:stream.internal.Transform}
+ */
 const jsonParser = new Transform({
     readableObjectMode: true,
 
@@ -10,7 +14,6 @@ const jsonParser = new Transform({
         } catch (error) {
 
         }
-        console.warn(chunk.toString())
         this.push(data)
         callback()
     }

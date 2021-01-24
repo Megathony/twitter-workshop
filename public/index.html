@@ -7,23 +7,29 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Subject battle</title>
     <style>
+        body {
+            padding: 20px;
+        }
         #spinner {
             visibility: hidden;
+            color: #aaa;
         }
         #chart {
             width: 400px;
             height: 400px;
+            margin-top: 20px;
         }
     </style>
 </head>
 <body>
+<h1>Compare trending topics on Twitter !</h1>
 <form>
-    <input type="text" id="subject1">
-    <input type="text" id="subject2">
+    <input type="text" id="topic1">
+    <input type="text" id="topic2">
     <button type="submit">Compare !</button>
     <span id="spinner">Waiting for tweets to arrive...</span>
 </form>
-<section style="width: 500px; max-width: 100%">
+<section style="width: 600px; max-width: 100%">
     <canvas id="chart" width="400" height="400"></canvas>
 </section>
 

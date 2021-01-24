@@ -3,17 +3,14 @@ const http = require('https')
 const needle = require('needle')
 const querystring = require('querystring')
 
+/**
+ * Twitter custop API wrapper for filtered stream
+ */
 const twitterApi = {
     TWT_API_HOST: "api.twitter.com",
     BEARER: process.env.TWITTER_BEARER_TOKEN,
     req: null,
     rules: [],
-    query: {
-        'tweet.fields': 'author_id'
-    },
-    get queryString () {
-        return querystring.encode(this.query)
-    },
 
     async init () {
         await this.fetchRules()
@@ -22,10 +19,14 @@ const twitterApi = {
     tweetStream: new stream.Readable({
         read () {},
     }),
+
+    /**
+     * Start binding incoming tweets to tweetStream
+     */
     startTweetStream () {
         const options = {
             hostname: this.TWT_API_HOST,
-            path: '/2/tweets/search/stream?' + this.queryString,
+            path: '/2/tweets/search/stream',
             method: 'GET',
             headers: {
                 Authorization: `Bearer ${process.env.TWITTER_BEARER_TOKEN}`
@@ -40,6 +41,10 @@ const twitterApi = {
         req.end()
     },
 
+    /**
+     * Fetches the existing filter rules on the API side to sync it with the locally stored rules
+     * @returns {Promise<void>}
+     */
     async fetchRules () {
         const result = await needle('get', 'https://' + this.TWT_API_HOST + '/2/tweets/search/stream/rules', {
             headers: {
@@ -52,6 +57,10 @@ const twitterApi = {
         }
     },
 
+    /**
+     * Adds one or many rules to the filter stream
+     * @param add Array|Object
+     */
     async addRules (add) {
         if (!Array.isArray(add)) {
             add = [ add ]
@@ -72,6 +81,11 @@ const twitterApi = {
         return []
     },
 
+    /**
+     * Deletes rules based on arrays of ids or tags
+     * @param rules Object of the form { ids: <array of ids> } | { tags: <array of tags> }
+     * @returns {Promise}
+     */
     async deleteRules (rules) {
         if (rules.tags) {
             rules.ids = this.tagsToIds(rules.tags)
@@ -90,6 +104,11 @@ const twitterApi = {
         return response.body
     },
 
+    /**
+     * Converts an arrays of rules tags to an array of rules ids
+     * @param tags
+     * @returns {[]}
+     */
     tagsToIds (tags) {
         const result = []
         tags.forEach(tag => {
@@ -101,6 +120,10 @@ const twitterApi = {
         return result
     },
 
+    /**
+     * Deletes all filter rules set
+     * @returns {Promise<Promise|null>}
+     */
     async deleteAllRules () {
         if (this.ids.length) {
             const rules = {
@@ -110,6 +133,11 @@ const twitterApi = {
         }
         return null
     },
+
+    /**
+     * Get an array of ids form the *rules* array
+     * @returns {*[]}
+     */
     get ids () {
         return this.rules.map(rule => rule.id)
     }

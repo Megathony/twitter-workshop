@@ -1,3 +1,7 @@
+/**
+ * Custom WS Stream to handle manually the JSON.parse step
+ */
+
 const {Writable} = require('stream')
 
 const wsStream = client => {

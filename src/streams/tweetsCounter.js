@@ -1,6 +1,10 @@
 const clientsRules = require('../clientsRules')
 const {Transform} = require('stream')
 
+/**
+ * Transfomr stream aimed at counting tweets matching each rule
+ * @type {module:stream.internal.Transform}
+ */
 const tweetsCounter = new Transform({
     objectMode: true,
     transform(chunk, _, callback) {

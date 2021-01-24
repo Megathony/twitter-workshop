@@ -7,7 +7,6 @@ const server = require('./src/server')
 const stream = require('stream')
 const twitterApi = require('./src/twitterApi')
 const jsonParser = require('./src/streams/jsonParser')
-const logger = require('./src/streams/logger')
 const tweetsCounter = require('./src/streams/tweetsCounter')
 const clientsRules = require('./src/clientsRules')
 const clientFilter = require('./src/streams/clientFilter')
@@ -20,10 +19,10 @@ const wsServer = new WebSocket.Server({ server })
 wsServer.on("connection", (client) => {
     const clientId = uuidv4()
     client.on("message", async (message) => {
-        const subjects = JSON.parse(message)
+        const topics = JSON.parse(message)
 
         await clientsRules.removeUserRules(clientId)
-        await clientsRules.addRules(subjects , clientId)
+        await clientsRules.addRules(topics , clientId)
     })
     client.on('close', async () => {
         socketStream.end()

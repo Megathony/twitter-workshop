@@ -1,22 +1,19 @@
-/**
- * Doit stocker les règles
- * Ajouter à chaque règle la liste de ses clients
- * Ajouter une règle à un client -> si elle existe on affecte, sinon on crée puis on affecte
- * vérifier si une règle a un utilisateur donné
- * libérer une règle d'un utilisateur
- * ajouter un tweet à un client
- */
-
 const twitterApi = require('./twitterApi')
 const { v4: uuidv4 } = require('uuid')
 
-const rules = twitterApi.rules.map(rule => {
-    rule.clients = []
-    return rule
-})
-
+/**
+ * A helper aimed at linking filtering rules to connected clients.
+ * It stores the filter rules active on the API, the number of tweets matching these rules and the clients listening for these rules
+ */
 const clientsRules = {
-    rules,
+    rules: [],
+
+    /**
+     * Adds filter rules and links them to a client.
+     * If one of the rules already exists, adds the client to the existing rule
+     * @param rules
+     * @param client
+     */
     async addRules (rules, client) {
         const newRules = []
         rules.forEach(rule => {
@@ -40,6 +37,11 @@ const clientsRules = {
         }
         return []
     },
+
+    /**
+     * Increments the number of tweets of a rule by 1
+     * @param tag
+     */
     increment (tag) {
         const rule = this.rules.find(rule => rule.tag === tag)
         if (rule) {
@@ -48,11 +50,18 @@ const clientsRules = {
         }
         return false
     },
+
+    /**
+     * Gets a rule by its value
+     * @param value
+     * @returns {*}
+     */
     getRuleByValue (value) {
         return this.rules.find(rule => rule.value === value.toLowerCase())
     },
     /**
-     * Remove user from clients list of a rule. If the rule is not affected to a client anymore, remove the rule
+     * Removes user from clients list of a rule.
+     * If the rule is not affected to a client anymore, removes the rule
      * @param userId
      */
     async removeUserRules (userId) {
@@ -71,12 +80,14 @@ const clientsRules = {
             if (rulesToRemove.length) {
                 return await this.removeRules(rulesToRemove)
             }
-            // await twitterApi.deleteRules({
-            //     tags: rules.map(rule => rule.tag)
-            // })
         }
     },
 
+    /**
+     * Removes a rule from the local object and syncs this with the API
+     * @param rules
+     * @returns {Promise<*>}
+     */
     async removeRules (rules) {
         const tags = rules.map(rule => rule.tag)
         this.rules = this.rules.filter((rule) => {

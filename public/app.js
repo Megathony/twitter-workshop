@@ -4,53 +4,13 @@ const socket = new WebSocket(`ws://${window.location.hostname}:${window.location
 let data = {}
 
 function updateData (newMessage) {
-    const subjectIndex = data.findIndex(subject => subject.title === newMessage.value)
-    if (subjectIndex > -1) {
-        data[subjectIndex].numberOfTweets = newMessage.numberOfTweets
+    const topicIndex = data.findIndex(topic => topic.title.toLowerCase() === newMessage.value.toLowerCase())
+    if (topicIndex > -1) {
+        data[topicIndex].numberOfTweets = newMessage.numberOfTweets
         stopLoading()
     }
     render()
 }
-
-socket.addEventListener("message", async function (event) {
-    try {
-        const data = JSON.parse(event.data)
-        updateData(data)
-    } catch(err) {
-        console.error(err)
-    }
-})
-
-socket.addEventListener('open', function (event) {
-    console.log("connected")
-});
-/*
-{"value":"reconfinement3","clients":["f6bd403b-378a-4323-a109-c9ec3101fd64"],"numberOfTweets":9,"tag":"424a724e-fd84-4c59-8097-53dcfb82e1a6"}
- */
-
-const input1 = $('#subject1')
-const input2 = $('#subject2')
-document.querySelector('form').addEventListener('submit', e => {
-    e.preventDefault()
-    if (input1.value && input2.value) {
-        data = [
-            {
-                title: input1.value,
-                numberOfTweets: 0
-            },
-            {
-                title: input2.value,
-                numberOfTweets: 0
-            }
-        ]
-        const request = JSON.stringify([ input1.value, input2.value ])
-        socket.send(request)
-        startLoading()
-        input1.value = ''
-        input2.value = ''
-        render()
-    }
-})
 
 function render () {
     if (data.length) {
@@ -66,7 +26,9 @@ function startLoading () {
 function stopLoading () {
     $('#spinner').style.visibility = 'hidden'
 }
-render()
+
+const input1 = $('#topic1')
+const input2 = $('#topic2')
 
 const ctx = document.getElementById('chart').getContext('2d');
 const chart = new Chart(ctx, {
@@ -93,6 +55,42 @@ const chart = new Chart(ctx, {
                     beginAtZero: true
                 }
             }]
+        },
+        legend: {
+            display: false
         }
     }
 });
+
+
+socket.addEventListener("message", async function (event) {
+    try {
+        const data = JSON.parse(event.data)
+        updateData(data)
+    } catch(err) {
+        console.error(err)
+    }
+})
+
+document.querySelector('form').addEventListener('submit', e => {
+    e.preventDefault()
+    if (input1.value && input2.value) {
+        data = [
+            {
+                title: input1.value,
+                numberOfTweets: 0
+            },
+            {
+                title: input2.value,
+                numberOfTweets: 0
+            }
+        ]
+        const request = JSON.stringify([ input1.value, input2.value ])
+        socket.send(request)
+        startLoading()
+        input1.value = ''
+        input2.value = ''
+        render()
+    }
+})
+
