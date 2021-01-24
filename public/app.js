@@ -53,11 +53,10 @@ document.querySelector('form').addEventListener('submit', e => {
 })
 
 function render () {
-    if (data.length >= 2) {
-        $('#subject1-title').innerText = data[0].title
-        $('#subject1-data').innerText = data[0].numberOfTweets
-        $('#subject2-title').innerText = data[1].title
-        $('#subject2-data').innerText = data[1].numberOfTweets
+    if (data.length) {
+        chart.data.labels = data.map(d => d.title)
+        chart.data.datasets[0].data = data.map(d => d.numberOfTweets)
+        chart.update()
     }
 }
 
@@ -70,12 +69,12 @@ function stopLoading () {
 render()
 
 const ctx = document.getElementById('chart').getContext('2d');
-const myChart = new Chart(ctx, {
+const chart = new Chart(ctx, {
     type: 'bar',
     data: {
-        labels: ['Red', 'Blue'],
+        labels: [],
         datasets: [{
-            data: [12, 19],
+            data: [0, 0],
             backgroundColor: [
                 'rgba(255, 99, 132, 0.2)',
                 'rgba(54, 162, 235, 0.2)'
